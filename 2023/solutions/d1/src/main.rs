@@ -5,23 +5,29 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::path::Path;
 
-fn main() -> io::Result<()> {
-    let out_dir = Path::new(env!("OUT_DIR"));
-    let file = File::open(Path::join(out_dir, "share/input.txt"))?;
-    let reader = BufReader::new(file);
+fn main() {
+    println!("Part one: {}", part_one());
+}
 
+fn part_one() -> i32 {
     let mut numbers = Vec::new();
 
-    for line in reader.lines() {
+    for line in read_lines() {
         match line {
             Ok(ln) => numbers.push(get_number(ln.as_str())),
-            Err(e) => return Err(e),
+            Err(e) => panic!("Error: {}", e),
         }
     }
 
-    println!("Result: {}", numbers.iter().sum::<i32>());
+    numbers.iter().sum::<i32>()
+}
 
-    Ok(())
+fn read_lines() -> io::Lines<io::BufReader<File>> {
+    let out_dir = Path::new(env!("OUT_DIR"));
+    let file = File::open(Path::join(out_dir, "share/input.txt")).unwrap();
+    let reader = BufReader::new(file);
+
+    return reader.lines()
 }
 
 fn get_number(line: &str) -> i32 {
