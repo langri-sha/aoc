@@ -6,29 +6,16 @@ use std::io::{self, BufRead, BufReader};
 use std::path::Path;
 
 fn main() {
-    println!("Part one: {}", part_one());
-    println!("Part two: {}", part_two());
+    println!("Part one: {}", solve(get_number));
+    println!("Part two: {}", solve(|line| get_number(replace_words(line).as_str())));
 }
 
-fn part_one() -> i32 {
+fn solve(solver: fn(&str) -> i32) -> i32 {
     let mut numbers = Vec::new();
 
     for line in read_lines() {
         match line {
-            Ok(ln) => numbers.push(get_number(ln.as_str())),
-            Err(e) => panic!("Error: {}", e),
-        }
-    }
-
-    numbers.iter().sum::<i32>()
-}
-
-fn part_two() -> i32 {
-    let mut numbers = Vec::new();
-
-    for line in read_lines() {
-        match line {
-            Ok(ln) => numbers.push(get_number(replace_words(ln.as_str()).as_str())),
+            Ok(ln) => numbers.push(solver(ln.as_str())),
             Err(e) => panic!("Error: {}", e),
         }
     }
