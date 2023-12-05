@@ -4,4 +4,5 @@ resolver = "2"
 
 members = [
   "solutions/d1",
+  "solutions/d2",
 ]
