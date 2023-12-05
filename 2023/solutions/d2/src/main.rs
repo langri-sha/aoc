@@ -9,9 +9,22 @@ fn main() {
 }
 
 fn solve(limit: Contents) -> usize {
-    let result = read_lines()
-        .enumerate()
-        .map(|(game, line)| {
+    let result =
+        read_cubes().enumerate().filter_map(|(game, seen)| {
+            if seen.0 <= limit.0 && seen.1 <= limit.1 && seen.2 <= limit.2 {
+                return Some(game + 1)
+            } else {
+                return None
+            }
+        })
+        .sum::<usize>();
+
+    return result;
+}
+
+fn read_cubes() -> impl Iterator<Item = Contents> {
+    read_lines()
+        .map(|line| {
             let mut seen = (0, 0, 0);
 
             line.unwrap()
@@ -34,15 +47,8 @@ fn solve(limit: Contents) -> usize {
                     };
                 });
 
-            if seen.0 <= limit.0 && seen.1 <= limit.1 && seen.2 <= limit.2 {
-                return game + 1;
-            }
-
-            return 0;
+            return seen
         })
-        .sum::<usize>();
-
-    return result;
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
