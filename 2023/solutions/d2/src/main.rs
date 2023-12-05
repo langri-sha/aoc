@@ -5,10 +5,10 @@ use std::path::Path;
 type Contents = (usize, usize, usize);
 
 fn main() {
-    println!("{}", solve((12, 13, 14)));
+    println!("{}", part_one((12, 13, 14)));
 }
 
-fn solve(limit: Contents) -> usize {
+fn part_one(limit: Contents) -> usize {
     let result =
         read_cubes().enumerate().filter_map(|(game, seen)| {
             if seen.0 <= limit.0 && seen.1 <= limit.1 && seen.2 <= limit.2 {
