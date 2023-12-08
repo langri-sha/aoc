@@ -21,21 +21,10 @@ fn part_one() -> usize {
             for cap in re_symbol.captures_iter(line) {
                 let col = cap.get(0).unwrap().start();
 
-                [
-                    (row - 1, col - 1),
-                    (row - 1, col),
-                    (row - 1, col + 1),
-                    (row, col - 1),
-                    (row, col + 1),
-                    (row + 1, col - 1),
-                    (row + 1, col),
-                    (row + 1, col + 1),
-                ]
-                .iter()
-                .filter(|(x, y)| x >= &0 && y >= &0 && x < &grid.len() && y < &line.len())
+                neighbours(row, col, &grid)
                 .for_each(|(x, y)| {
-                    if grid[*x].chars().nth(*y).unwrap().is_ascii_digit() {
-                        hits.entry(*x).or_insert_with(HashSet::new).insert(*y);
+                    if grid[x].chars().nth(y).unwrap().is_ascii_digit() {
+                        hits.entry(x).or_insert_with(HashSet::new).insert(y);
                     };
                 })
             }
@@ -62,6 +51,33 @@ fn part_one() -> usize {
                 .sum::<usize>()
         })
         .sum::<usize>()
+}
+
+fn neighbours(
+    row: usize,
+    col: usize,
+    grid: &Vec<String>,
+) -> impl Iterator<Item = (usize, usize)> {
+    [
+        (row - 1, col - 1),
+        (row - 1, col),
+        (row - 1, col + 1),
+        (row, col - 1),
+        (row, col + 1),
+        (row + 1, col - 1),
+        (row + 1, col),
+        (row + 1, col + 1),
+    ]
+    .iter()
+    .filter_map(move |(x, y)| {
+        if x >= &0 && y >= &0 && x < &grid.len() && y < &grid[row].len() {
+            Some((x.to_owned(), y.to_owned()))
+        } else {
+            None
+        }
+    })
+    .collect::<Vec<(usize, usize)>>()
+    .into_iter()
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
