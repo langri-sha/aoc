@@ -10,7 +10,6 @@ fn main() {
 }
 
 fn part_one() -> usize {
-    let re_nums = Regex::new(r"\d+").unwrap();
     let re_symbol = Regex::new(r"[^\.0-9]").unwrap();
 
     let grid = read_lines().map(|i| i.unwrap()).collect::<Vec<String>>();
@@ -21,8 +20,7 @@ fn part_one() -> usize {
             for cap in re_symbol.captures_iter(line) {
                 let col = cap.get(0).unwrap().start();
 
-                neighbours(row, col, &grid)
-                .for_each(|(x, y)| {
+                neighbours(row, col, &grid).for_each(|(x, y)| {
                     if grid[x].chars().nth(y).unwrap().is_ascii_digit() {
                         hits.entry(x).or_insert_with(HashSet::new).insert(y);
                     };
@@ -31,33 +29,12 @@ fn part_one() -> usize {
 
             hits
         })
-        .iter()
-        .map(|(row, col)| {
-            re_nums
-                .captures_iter(grid[*row].as_str())
-                .map(|c| c.get(0).unwrap())
-                .fold(Vec::new(), |mut caps, c| {
-                    for num in col.iter() {
-                        if num >= &&c.start() && num <= &&c.end() {
-                            caps.push(c.as_str());
-                            break;
-                        }
-                    }
-
-                    return caps;
-                })
-                .iter()
-                .map(|c| c.parse::<usize>().unwrap())
-                .sum::<usize>()
-        })
+        .into_iter()
+        .map(|(row, col)| numbers(&grid, row, col).iter().sum::<usize>())
         .sum::<usize>()
 }
 
-fn neighbours(
-    row: usize,
-    col: usize,
-    grid: &Vec<String>,
-) -> impl Iterator<Item = (usize, usize)> {
+fn neighbours(row: usize, col: usize, grid: &Vec<String>) -> impl Iterator<Item = (usize, usize)> {
     [
         (row - 1, col - 1),
         (row - 1, col),
@@ -78,6 +55,27 @@ fn neighbours(
     })
     .collect::<Vec<(usize, usize)>>()
     .into_iter()
+}
+
+fn numbers(grid: &Vec<String>, row: usize, col: HashSet<usize>) -> Vec<usize> {
+    let re_nums = Regex::new(r"\d+").unwrap();
+
+    re_nums
+        .captures_iter(grid[row].as_str())
+        .map(|c| c.get(0).unwrap())
+        .fold(Vec::new(), |mut caps, c| {
+            for num in col.iter() {
+                if num >= &&c.start() && num <= &&c.end() {
+                    caps.push(c.as_str());
+                    break;
+                }
+            }
+
+            return caps;
+        })
+        .iter()
+        .map(|c| c.parse::<usize>().unwrap())
+        .collect::<Vec<usize>>()
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
