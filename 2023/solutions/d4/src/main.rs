@@ -9,27 +9,31 @@ fn main() {
 }
 
 fn part_one() -> usize {
-    read_lines()
-        .map(|line| {
-            line.unwrap()
-                .split(|c| c == ':' || c == '|')
-                .skip(1)
-                .map(|s| {
-                    let re = Regex::new(r"\d+").unwrap();
-
-                    re.captures_iter(s)
-                        .map(|c| c[0].parse::<usize>().unwrap())
-                        .collect::<HashSet<_>>()
-                })
-                .collect::<Vec<_>>()
-                .chunks_exact(2)
-                .map(|slice| match slice {
-                    [a, b] => 2usize.pow(a.intersection(b).count().try_into().unwrap()) / 2,
-                    _ => panic!("Invalid input"),
-                })
-                .sum::<usize>()
-        })
+    parse_cards()
+        .map(|c| 2usize.pow(c.try_into().unwrap()) / 2)
         .sum::<usize>()
+}
+
+fn parse_cards() -> impl Iterator<Item = usize> {
+    read_lines().map(|line| {
+        line.unwrap()
+            .split(|c| c == ':' || c == '|')
+            .skip(1)
+            .map(|s| {
+                let re = Regex::new(r"\d+").unwrap();
+
+                re.captures_iter(s)
+                    .map(|c| c[0].parse::<usize>().unwrap())
+                    .collect::<HashSet<_>>()
+            })
+            .collect::<Vec<_>>()
+            .chunks_exact(2)
+            .map(|slice| match slice {
+                [a, b] => a.intersection(b).count(),
+                _ => panic!("Invalid input"),
+            })
+            .sum::<_>()
+    })
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
