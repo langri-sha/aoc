@@ -32,6 +32,9 @@ dependencies = [
 [[package]]
 name = "d4"
 version = "0.1.0"
+dependencies = [
+ "regex",
+]
 
 [[package]]
 name = "memchr"
