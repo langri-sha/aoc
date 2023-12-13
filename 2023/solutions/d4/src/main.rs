@@ -1,16 +1,33 @@
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::path::Path;
 
 fn main() {
     println!("{}", part_one());
+    println!("{}", part_two());
 }
 
 fn part_one() -> usize {
     parse_cards()
         .map(|c| 2usize.pow(c.try_into().unwrap()) / 2)
+        .sum::<usize>()
+}
+
+fn part_two() -> usize {
+    parse_cards()
+        .enumerate()
+        .fold(HashMap::new(), |mut wins, (i, c)| {
+            *wins.entry(i).or_insert(0usize) += 1;
+
+            (i..i + c).for_each(|j| {
+                *wins.entry(j + 1).or_insert(0) += *wins.entry(i).or_insert(1);
+            });
+
+            wins
+        })
+        .values()
         .sum::<usize>()
 }
 
