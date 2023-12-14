@@ -41,6 +41,10 @@ fn part_one() -> usize {
             (seeds, mappings)
         });
 
+    find_lowest_location(seeds, mappings)
+}
+
+fn find_lowest_location(seeds: Vec<usize>, mappings: Vec<Vec<Vec<usize>>>) -> usize {
     seeds.into_iter().map(|seed| mappings.iter().fold(seed, |seed, mapping| {
         mapping.iter().find_map(|mappings| {
             let [destination, source, length] = mappings[..] else {
