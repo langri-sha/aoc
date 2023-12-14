@@ -8,8 +8,14 @@ fn main() {
 }
 
 fn part_one() -> usize {
-    let (seeds, mappings) =
-        read_lines().fold((Vec::new(), Vec::new()), |(seeds, mut mappings), line| {
+    let (seeds, mappings) = read_seeds_mappings();
+
+
+    find_lowest_location(seeds, mappings)
+}
+
+fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<Vec<usize>>>) {
+    read_lines().fold((Vec::new(), Vec::new()), |(seeds, mut mappings), line| {
             let line = line.unwrap();
 
             if line.is_empty() {
@@ -39,9 +45,7 @@ fn part_one() -> usize {
             }
 
             (seeds, mappings)
-        });
-
-    find_lowest_location(seeds, mappings)
+        })
 }
 
 fn find_lowest_location(seeds: Vec<usize>, mappings: Vec<Vec<Vec<usize>>>) -> usize {
