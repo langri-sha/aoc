@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
+use std::ops::Range;
 use std::path::Path;
 use std::usize;
 
@@ -13,7 +14,7 @@ fn part_one() -> usize {
     find_lowest_location(seeds, mappings)
 }
 
-fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<Vec<usize>>>) {
+fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<(Range<usize>, usize)>>) {
     read_lines().fold((Vec::new(), Vec::new()), |(seeds, mut mappings), line| {
         let line = line.unwrap();
 
@@ -36,31 +37,33 @@ fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<Vec<usize>>>) {
         } else {
             let last = mappings.last_mut().unwrap();
 
-            last.push(
-                line.split_ascii_whitespace()
+            last.push({
+                let [destination, source, length] = line
+                    .split_ascii_whitespace()
                     .map(|s| s.parse::<usize>().unwrap())
-                    .collect::<Vec<_>>(),
-            );
+                    .collect::<Vec<_>>()[..]
+                else {
+                    panic!("Invalid mapping: {:?}", line);
+                };
+
+                (source..source + length, destination)
+            });
         }
 
         (seeds, mappings)
     })
 }
 
-fn find_lowest_location(seeds: Vec<usize>, mappings: Vec<Vec<Vec<usize>>>) -> usize {
+fn find_lowest_location(seeds: Vec<usize>, mappings: Vec<Vec<(Range<usize>, usize)>>) -> usize {
     seeds
         .into_iter()
         .map(|seed| {
             mappings.iter().fold(seed, |seed, mapping| {
                 mapping
                     .iter()
-                    .find_map(|mappings| {
-                        let [destination, source, length] = mappings[..] else {
-                            panic!("Invalid mapping: {:?}", mappings);
-                        };
-
-                        if (seed >= source) && (seed <= (source + length)) {
-                            Some(destination + (seed - source))
+                    .find_map(|(range, destination)| {
+                        if (seed >= range.start) && (seed <= range.end) {
+                            Some(destination + (seed - range.start))
                         } else {
                             None
                         }
