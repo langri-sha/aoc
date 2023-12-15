@@ -11,7 +11,24 @@ fn main() {
 fn part_one() -> usize {
     let (seeds, mappings) = read_seeds_mappings();
 
-    find_lowest_location(seeds, mappings)
+    seeds
+        .into_iter()
+        .map(|seed| {
+            mappings.iter().fold(seed, |seed, mapping| {
+                mapping
+                    .iter()
+                    .find_map(|(range, destination)| {
+                        if (seed >= range.start) && (seed <= range.end) {
+                            Some(destination + (seed - range.start))
+                        } else {
+                            None
+                        }
+                    })
+                    .unwrap_or(seed)
+            })
+        })
+        .min()
+        .unwrap()
 }
 
 fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<(Range<usize>, usize)>>) {
@@ -52,27 +69,6 @@ fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<(Range<usize>, usize)>>) {
 
         (seeds, mappings)
     })
-}
-
-fn find_lowest_location(seeds: Vec<usize>, mappings: Vec<Vec<(Range<usize>, usize)>>) -> usize {
-    seeds
-        .into_iter()
-        .map(|seed| {
-            mappings.iter().fold(seed, |seed, mapping| {
-                mapping
-                    .iter()
-                    .find_map(|(range, destination)| {
-                        if (seed >= range.start) && (seed <= range.end) {
-                            Some(destination + (seed - range.start))
-                        } else {
-                            None
-                        }
-                    })
-                    .unwrap_or(seed)
-            })
-        })
-        .min()
-        .unwrap()
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
