@@ -79,9 +79,8 @@ fn map_seed_range(seed: Range<usize>, mapping: &Vec<(Range<usize>, usize)>) -> V
             vec![]
         };
 
-        let body = vec![
-            (destination + base.start - range.start)..(destination + base.end - range.start),
-        ];
+        let body =
+            vec![(destination + base.start - range.start)..(destination + base.end - range.start)];
 
         result = head.into_iter().chain(body).chain(tail).collect();
     } else {
