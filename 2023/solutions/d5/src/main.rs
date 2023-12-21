@@ -6,6 +6,7 @@ use std::usize;
 
 fn main() {
     println!("{}", part_one());
+    println!("{}", part_two());
 }
 
 fn part_one() -> usize {
@@ -29,6 +30,65 @@ fn part_one() -> usize {
         })
         .min()
         .unwrap()
+}
+
+fn part_two() -> usize {
+    let (seeds, mappings) = read_seeds_mappings();
+
+    seeds
+        .chunks_exact(2)
+        .into_iter()
+        .map(|chunk| chunk[0]..chunk[0] + chunk[1])
+        .flat_map(|seed: Range<usize>| {
+            mappings.iter().fold(vec![seed], |seeds, mapping| {
+                let mut result = seeds
+                    .into_iter()
+                    .flat_map(|seed| map_seed_range(seed, mapping))
+                    .collect::<Vec<_>>();
+
+                result.sort_by(|a, b| a.start.cmp(&b.start));
+                result
+            })
+        })
+        .min_by(|a, b| a.start.cmp(&b.start))
+        .unwrap()
+        .start
+}
+
+fn map_seed_range(seed: Range<usize>, mapping: &Vec<(Range<usize>, usize)>) -> Vec<Range<usize>> {
+    let overlap = mapping
+        .iter()
+        .find(|(range, _)| seed.start.max(range.start) < seed.end.min(range.end));
+
+    let result: Vec<Range<usize>>;
+
+    if let Some((range, destination)) = overlap {
+        let mut base = seed.start..seed.end;
+
+        let head = if seed.start < range.start {
+            base.start = range.start;
+            map_seed_range(seed.start..range.start, mapping)
+        } else {
+            vec![]
+        };
+
+        let tail = if seed.end > range.end {
+            base.end = range.end;
+            map_seed_range(range.end..seed.end, mapping)
+        } else {
+            vec![]
+        };
+
+        let body = vec![
+            (destination + base.start - range.start)..(destination + base.end - range.start),
+        ];
+
+        result = head.into_iter().chain(body).chain(tail).collect();
+    } else {
+        result = vec![seed];
+    }
+
+    result
 }
 
 fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<(Range<usize>, usize)>>) {
@@ -71,12 +131,15 @@ fn read_seeds_mappings() -> (Vec<usize>, Vec<Vec<(Range<usize>, usize)>>) {
             (seeds, mappings)
         });
 
-    let mappings = mappings.iter().map(|mapping| {
-        let mut cloned = mapping.clone();
+    let mappings = mappings
+        .iter()
+        .map(|mapping| {
+            let mut cloned = mapping.clone();
 
-        cloned.sort_by(|(range_a, _), (range_b, _)| range_a.start.cmp(&range_b.start));
-        cloned
-    }).collect::<Vec<_>>();
+            cloned.sort_by(|(range_a, _), (range_b, _)| range_a.start.cmp(&range_b.start));
+            cloned
+        })
+        .collect::<Vec<_>>();
 
     (seeds, mappings)
 }
