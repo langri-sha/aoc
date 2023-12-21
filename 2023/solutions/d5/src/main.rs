@@ -16,16 +16,7 @@ fn part_one() -> usize {
         .into_iter()
         .map(|seed| {
             mappings.iter().fold(seed, |seed, mapping| {
-                mapping
-                    .iter()
-                    .find_map(|(range, destination)| {
-                        if (seed >= range.start) && (seed <= range.end) {
-                            Some(destination + (seed - range.start))
-                        } else {
-                            None
-                        }
-                    })
-                    .unwrap_or(seed)
+                map_seed_range(seed..seed + 1, mapping).pop().unwrap().start
             })
         })
         .min()
