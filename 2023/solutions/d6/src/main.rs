@@ -6,6 +6,7 @@ use std::path::Path;
 
 fn main() {
     println!("{}", part_one());
+    println!("{}", part_two());
 }
 
 fn part_one() -> usize {
@@ -20,6 +21,42 @@ fn part_one() -> usize {
 
         result * wins
     })
+}
+
+fn part_two() -> usize {
+    let [time, distance] = read_races()
+        .collect::<Vec<_>>()
+        .iter()
+        .fold(
+            [Vec::new(), Vec::new()],
+            |[mut times, mut distances], (time, distance)| {
+                times.push(time);
+                distances.push(distance);
+
+                [times, distances]
+            },
+        )
+        .iter()
+        .map(|v| {
+            v.iter()
+                .map(|v| v.to_string())
+                .collect::<String>()
+                .parse::<usize>()
+                .unwrap()
+        })
+        .collect::<Vec<_>>()
+        .try_into()
+        .unwrap();
+
+    let mut wins = 0usize;
+
+    for i in 1..time {
+        if i * (time - i) > distance {
+            wins += 1;
+        }
+    }
+
+    wins
 }
 
 fn read_races() -> Zip<impl Iterator<Item = usize>, impl Iterator<Item = usize>> {
