@@ -57,6 +57,9 @@ version = "0.1.0"
 [[package]]
 name = "d8"
 version = "0.1.0"
+dependencies = [
+ "regex",
+]
 
 [[package]]
 name = "memchr"
