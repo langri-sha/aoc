@@ -9,12 +9,49 @@ fn main() {
 }
 
 fn part_one() -> usize {
+    let get_card_position = |card: &char| {
+        ("AKQJT98765432")
+            .chars()
+            .rev()
+            .position(|c| c == *card)
+            .unwrap()
+    };
+
+    let get_hand_type = |hand: &str| {
+        let occurences = hand
+            .chars()
+            .fold(HashSet::new(), |mut cards, card| {
+                cards.insert(card);
+
+                cards
+            })
+            .iter()
+            .map(|card| *card)
+            .map(|card| {
+                hand.rmatches(card.to_string().as_str())
+                    .collect::<Vec<_>>()
+                    .len()
+            })
+            .collect::<Vec<_>>();
+        let max = occurences.iter().max().unwrap();
+
+        get_hand(occurences.len(), *max)
+    };
+
+    solve(get_hand_type, get_card_position)
+}
+
+fn solve<H, C>(get_hand_type: H, get_card_position: C) -> usize
+where
+    H: Fn(&str) -> Hand,
+    C: Fn(&char) -> usize,
+{
     let mut totals = read_hands()
         .map(|(hand, bid)| (hand.clone(), get_hand_type(&hand), bid))
         .collect::<Vec<_>>();
 
-    totals.sort_by(
-        |(hand1, _, _), (hand2, _, _)| match are_same_hand_types(hand1, hand2) {
+    totals.sort_by(|(hand1, _, _), (hand2, _, _)| {
+        match are_same_hand_types(hand1, hand2, &get_hand_type) {
             Ordering::Equal => hand1
                 .chars()
                 .zip(hand2.chars())
@@ -34,8 +71,8 @@ fn part_one() -> usize {
                 })
                 .unwrap(),
             compare => compare,
-        },
-    );
+        }
+    });
 
     totals
         .iter()
@@ -43,7 +80,10 @@ fn part_one() -> usize {
         .fold(0usize, |acc, (index, (_, _, bid))| acc + (index + 1) * bid)
 }
 
-fn are_same_hand_types(hand1: &str, hand2: &str) -> Ordering {
+fn are_same_hand_types<H>(hand1: &str, hand2: &str, get_hand_type: H) -> Ordering
+where
+    H: Fn(&str) -> Hand,
+{
     let [hand1, hand2] = [hand1, hand2]
         .into_iter()
         .map(get_hand_type)
@@ -73,47 +113,17 @@ enum Hand {
     HighCard,
 }
 
-fn get_hand_type(hand: &str) -> Hand {
-    let occurences = hand
-        .chars()
-        .fold(HashSet::new(), |mut cards, card| {
-            cards.insert(card);
-
-            cards
-        })
-        .iter()
-        .map(|card| *card)
-        .map(|card| {
-            hand.rmatches(card.to_string().as_str())
-                .collect::<Vec<_>>()
-                .len()
-        })
-        .collect::<Vec<_>>();
-    let max = occurences.iter().max().unwrap();
-
-    match occurences.len() {
+fn get_hand(distinct: usize, max: usize) -> Hand {
+    match distinct {
         5 => Hand::HighCard,
         4 => Hand::OnePair,
-        3 if *max == 3 => Hand::ThreeOfAKind,
+        3 if max == 3 => Hand::ThreeOfAKind,
         3 => Hand::TwoPair,
-        2 if *max == 3 => Hand::FullHouse,
+        2 if max == 3 => Hand::FullHouse,
         2 => Hand::FourOfAKind,
         1 => Hand::FiveOfAKind,
         _ => panic!("Unhandled hand type"),
     }
-}
-
-fn get_card_position(card: &char) -> usize {
-    get_cards().iter().position(|c| c == card).unwrap()
-}
-
-fn get_cards() -> [char; 13] {
-    ("AKQJT98765432")
-        .chars()
-        .rev()
-        .collect::<Vec<_>>()
-        .try_into()
-        .unwrap()
 }
 
 fn read_hands() -> impl Iterator<Item = (String, usize)> {
