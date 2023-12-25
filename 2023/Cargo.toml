@@ -10,4 +10,5 @@ members = [
   "solutions/d5",
   "solutions/d6",
   "solutions/d7",
+  "solutions/d8",
 ]
