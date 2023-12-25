@@ -6,6 +6,7 @@ use std::path::Path;
 
 fn main() {
     println!("{}", part_one());
+    println!("{}", part_two());
 }
 
 fn part_one() -> usize {
@@ -25,6 +26,42 @@ fn part_one() -> usize {
     }
 
     steps
+}
+
+fn part_two() -> usize {
+    let (instructions, network) = parse_input();
+
+    network
+        .keys()
+        .filter(|k| k.ends_with("A"))
+        .fold(Vec::new(), |mut steps, start_node| {
+            let mut next = start_node.to_owned();
+            let mut step = 0usize;
+
+            for char in instructions.chars().cycle() {
+                if next.ends_with("Z") {
+                    break;
+                }
+
+                step += 1;
+
+                next = get_next(&next, char, &network);
+            }
+
+            steps.push(step);
+            steps
+        })
+        .iter()
+        .fold(
+            0usize,
+            |result, step| {
+                if result == 0 {
+                    *step
+                } else {
+                    (result * step) / gcd(*step, result)
+                }
+            },
+        )
 }
 
 fn get_next(current: &str, instruction: char, network: &HashMap<String, [String; 2]>) -> String {
@@ -63,4 +100,12 @@ fn read_lines() -> io::Lines<io::BufReader<File>> {
     let reader = BufReader::new(file);
 
     reader.lines()
+}
+
+fn gcd(a: usize, b: usize) -> usize {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
 }
