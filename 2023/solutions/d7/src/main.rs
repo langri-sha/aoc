@@ -6,6 +6,7 @@ use std::path::Path;
 
 fn main() {
     println!("{}", part_one());
+    println!("{}", part_two());
 }
 
 fn part_one() -> usize {
@@ -36,6 +37,44 @@ fn part_one() -> usize {
         let max = occurences.iter().max().unwrap();
 
         get_hand(occurences.len(), *max)
+    };
+
+    solve(get_hand_type, get_card_position)
+}
+
+fn part_two() -> usize {
+    let get_card_position = |card: &char| {
+        ("AKQT98765432J")
+            .chars()
+            .rev()
+            .position(|c| c == *card)
+            .unwrap()
+    };
+
+    let get_hand_type = |hand: &str| {
+        let mut jokers = 0usize;
+        let occurences = hand
+            .chars()
+            .fold(HashSet::new(), |mut cards, card| {
+                if card == 'J' {
+                    jokers += 1;
+                } else {
+                    cards.insert(card);
+                }
+
+                cards
+            })
+            .iter()
+            .map(|card| *card)
+            .map(|card| {
+                hand.rmatches(card.to_string().as_str())
+                    .collect::<Vec<_>>()
+                    .len()
+            })
+            .collect::<Vec<_>>();
+        let max = occurences.iter().max().unwrap_or(&0) + jokers;
+
+        get_hand(occurences.len(), max)
     };
 
     solve(get_hand_type, get_card_position)
@@ -121,8 +160,7 @@ fn get_hand(distinct: usize, max: usize) -> Hand {
         3 => Hand::TwoPair,
         2 if max == 3 => Hand::FullHouse,
         2 => Hand::FourOfAKind,
-        1 => Hand::FiveOfAKind,
-        _ => panic!("Unhandled hand type"),
+        _ => Hand::FiveOfAKind,
     }
 }
 
