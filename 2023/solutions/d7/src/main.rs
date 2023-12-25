@@ -10,15 +10,12 @@ fn main() {
 
 fn part_one() -> usize {
     let mut totals = read_hands()
-        .map(|(hand, bid)| (hand.clone(), get_hand_value(&hand), bid))
+        .map(|(hand, bid)| (hand.clone(), get_hand_type(&hand), bid))
         .collect::<Vec<_>>();
 
-    totals.sort_by(|(hand1, value1, _), (hand2, value2, _)| {
-        let compare = are_same_hand_type(hand1, hand2);
-
-        if compare == Ordering::Equal {
-            println!("EQUAL {} {}", hand1, hand2);
-            hand1
+    totals.sort_by(
+        |(hand1, _, _), (hand2, _, _)| match are_same_hand_types(hand1, hand2) {
+            Ordering::Equal => hand1
                 .chars()
                 .zip(hand2.chars())
                 .find_map(|(card1, card2)| {
@@ -33,63 +30,77 @@ fn part_one() -> usize {
                         })
                         .unwrap();
 
-                    println!("{:?} {} {}", result, card1, card2);
-
                     result
                 })
-                .unwrap()
-        } else {
-            compare
-        }
-    });
+                .unwrap(),
+            compare => compare,
+        },
+    );
 
     totals
         .iter()
         .enumerate()
-        .fold(0usize, |acc, (index, (_, _, bid))| {
-            println!("{} {}", index + 1, bid);
-            acc + (index + 1) * bid
-        })
+        .fold(0usize, |acc, (index, (_, _, bid))| acc + (index + 1) * bid)
 }
 
-fn are_same_hand_type(hand1: &str, hand2: &str) -> Ordering {
-    println!("SIZE_IN  {} {}", hand1, hand2);
-
+fn are_same_hand_types(hand1: &str, hand2: &str) -> Ordering {
     let [hand1, hand2] = [hand1, hand2]
         .into_iter()
-        .map(get_hand_value)
-        .map(|value| {
-            if value == 0 {
-                1
-            } else {
-                (value as f64).log10().floor() as usize + 1
-            }
+        .map(get_hand_type)
+        .map(|hand| match hand {
+            Hand::HighCard => 0,
+            Hand::OnePair => 1,
+            Hand::TwoPair => 2,
+            Hand::ThreeOfAKind => 3,
+            Hand::FullHouse => 4,
+            Hand::FourOfAKind => 5,
+            Hand::FiveOfAKind => 6,
         })
         .collect::<Vec<_>>()
         .try_into()
         .unwrap();
 
-    println!("SIZE_OUT {} {}", hand1, hand2);
-
     hand1.cmp(&hand2)
 }
 
-fn get_hand_value(hand: &str) -> usize {
-    hand.chars()
+enum Hand {
+    FiveOfAKind,
+    FourOfAKind,
+    FullHouse,
+    ThreeOfAKind,
+    TwoPair,
+    OnePair,
+    HighCard,
+}
+
+fn get_hand_type(hand: &str) -> Hand {
+    let occurences = hand
+        .chars()
         .fold(HashSet::new(), |mut cards, card| {
             cards.insert(card);
 
             cards
         })
         .iter()
-        .fold(0usize, |sum, card| {
-            let occurrences = hand
-                .rmatches(card.to_string().as_str())
+        .map(|card| *card)
+        .map(|card| {
+            hand.rmatches(card.to_string().as_str())
                 .collect::<Vec<_>>()
-                .len();
-
-            sum + 10usize.pow(occurrences as u32) + get_card_position(card)
+                .len()
         })
+        .collect::<Vec<_>>();
+    let max = occurences.iter().max().unwrap();
+
+    match occurences.len() {
+        5 => Hand::HighCard,
+        4 => Hand::OnePair,
+        3 if *max == 3 => Hand::ThreeOfAKind,
+        3 => Hand::TwoPair,
+        2 if *max == 3 => Hand::FullHouse,
+        2 => Hand::FourOfAKind,
+        1 => Hand::FiveOfAKind,
+        _ => panic!("Unhandled hand type"),
+    }
 }
 
 fn get_card_position(card: &char) -> usize {
