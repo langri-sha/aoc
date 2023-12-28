@@ -2,12 +2,19 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::path::Path;
+use colored::Colorize;
 
 fn main() {
     println!("{}", part_one());
 }
 
 fn part_one() -> usize {
+    let (_, pipes) = parse_map();
+
+    pipes.len() / 2
+}
+
+fn parse_map() -> (Vec<Vec<char>>, HashSet<(usize, usize)>) {
     let tiles: Vec<Vec<char>> = read_lines().map(|line| line.unwrap().chars().collect()).collect();
     let width = tiles[0].len();
     let height = tiles.len();
@@ -46,16 +53,14 @@ fn part_one() -> usize {
         }
     }
 
-    print_map(&tiles, &seen);
-
-    return (seen.len()) / 2;
+    (tiles, seen)
 }
 
 fn print_map(tiles: &Vec<Vec<char>>, seen: &HashSet<(usize, usize)>) {
     for (y, row) in tiles.iter().enumerate() {
         for (x, tile) in row.iter().enumerate() {
             if seen.contains(&(x, y)) {
-                print!("*");
+                print!("{}", tile.to_string().green());
             } else {
                 print!("{}", tile);
             }
