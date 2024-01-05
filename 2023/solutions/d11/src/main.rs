@@ -11,7 +11,7 @@ fn part_one() -> usize {
         .map(|line| line.unwrap())
         .map(|line| line.chars().collect::<Vec<_>>())
         .fold(Vec::new(), |mut acc, line| {
-            if line.iter().all(|c| c == &' ') {
+            if line.iter().all(|c| c == &'.') {
                 acc.push(line.clone());
             }
 
@@ -20,19 +20,41 @@ fn part_one() -> usize {
             acc
         });
 
-    (0..lines.first().unwrap().len()).for_each(|n| {
-        if lines.iter().all(|line| line[n] == '.') {
-            for line in lines.iter_mut() {
-                line.insert(n, '.');
-            }
-        }
+    let expanded: Vec<usize> = (0..lines.first().unwrap().len())
+        .filter(|n| lines.iter().all(|line| line[*n] == '.'))
+        .collect();
+
+    expanded.iter().enumerate().for_each(|(i, n)| {
+        lines.iter_mut().for_each(|line| {
+            line.insert(i + n, '.');
+        });
     });
 
-    for line in lines.iter() {
-        println!("{}", line.iter().collect::<String>());
-    }
+    let mut galaxies = lines
+        .iter()
+        .enumerate()
+        .fold(Vec::new(), |mut acc, (y, line)| {
+            line.iter().enumerate().for_each(|(x, &c)| {
+                if c == '#' {
+                    acc.push((x, y));
+                }
+            });
 
-    10
+            acc
+        });
+
+    galaxies.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+
+    galaxies
+        .iter()
+        .enumerate()
+        .fold(0usize, |acc, (i, (x1, y1))| {
+            acc + galaxies
+                .iter()
+                .skip(i + 1)
+                .map(|(x2, y2)| x2.abs_diff(*x1) + y2.abs_diff(*y1))
+                .sum::<usize>()
+        })
 }
 
 fn read_lines() -> io::Lines<io::BufReader<File>> {
