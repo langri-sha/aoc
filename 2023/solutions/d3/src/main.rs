@@ -49,7 +49,9 @@ fn part_two() -> usize {
                     neighbours(row, col, &grid)
                         .filter_map(|(x, y)| {
                             if grid[x].chars().nth(y).unwrap().is_ascii_digit() {
-                                return Some(numbers(&grid, x, vec![y]).first().unwrap().to_owned());
+                                return Some(
+                                    numbers(&grid, x, vec![y]).first().unwrap().to_owned(),
+                                );
                             }
 
                             return None;
@@ -63,9 +65,7 @@ fn part_two() -> usize {
         .into_iter()
         .filter_map(|hits| {
             if hits.len() == 2 {
-                return Some(
-                    hits.iter().product::<usize>(),
-                );
+                return Some(hits.iter().product::<usize>());
             } else {
                 return None;
             }
