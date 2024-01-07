@@ -1,5 +1,6 @@
 .*
 !.editorconfig
 !.gitignore
+!.github
 
 /2023/target
