@@ -33,10 +33,7 @@ fn part_two() -> isize {
             next = next.windows(2).map(|w| w[1] - w[0]).collect::<Vec<_>>();
         }
 
-        acc + heads
-            .iter()
-            .rev()
-            .fold(0isize, |acc, &v| v - acc)
+        acc + heads.iter().rev().fold(0isize, |acc, &v| v - acc)
     })
 }
 

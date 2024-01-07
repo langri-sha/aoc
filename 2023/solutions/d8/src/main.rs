@@ -52,16 +52,13 @@ fn part_two() -> usize {
             steps
         })
         .iter()
-        .fold(
-            0usize,
-            |result, step| {
-                if result == 0 {
-                    *step
-                } else {
-                    (result * step) / gcd(*step, result)
-                }
-            },
-        )
+        .fold(0usize, |result, step| {
+            if result == 0 {
+                *step
+            } else {
+                (result * step) / gcd(*step, result)
+            }
+        })
 }
 
 fn get_next(current: &str, instruction: char, network: &HashMap<String, [String; 2]>) -> String {

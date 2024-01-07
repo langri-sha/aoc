@@ -7,7 +7,10 @@ use std::path::Path;
 
 fn main() {
     println!("Part one: {}", solve(get_number));
-    println!("Part two: {}", solve(|line| get_number(replace_words(line).as_str())));
+    println!(
+        "Part two: {}",
+        solve(|line| get_number(replace_words(line).as_str()))
+    );
 }
 
 fn solve(solver: fn(&str) -> i32) -> i32 {
