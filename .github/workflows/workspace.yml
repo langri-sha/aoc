@@ -5,3 +5,8 @@ on:
     branches:
       - main
   pull_request:
+
+jobs:
+  lint:
+    name: Check linters
+    runs-on: ubuntu-latest
