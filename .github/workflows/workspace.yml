@@ -1,1 +1,4 @@
 name: Workspace
+
+on:
+  pull_request:
